@@ -10,6 +10,29 @@ class AliveCellSpec extends FlatSpec with ShouldMatchers {
         AliveCell.nextGeneration(2) should be (AliveCell)
     }
 
+    "A live cell with three live neighbors" should "stay alive" in {
+        AliveCell.nextGeneration(3) should be (AliveCell)
+    }
+
+    "A live cell with one live neighbor" should "die" in {
+        AliveCell.nextGeneration(1) should be (DeadCell)
+    }
+
+    "A live cell with four live neighbors" should "die" in {
+        AliveCell.nextGeneration(4) should be (DeadCell)
+    }
+
+    "A live cell with zero live neighbors" should "die" in {
+        AliveCell.nextGeneration(0) should be (DeadCell)
+    }
+
+    "A live cell with minimum possible live neighbors" should "die" in {
+        AliveCell.nextGeneration(Integer.MIN_VALUE) should be (DeadCell)
+    }
+
+    "A live cell with maximum possible live neighbors" should "die" in {
+        AliveCell.nextGeneration(Integer.MAX_VALUE) should be (DeadCell)
+    }
 }
 
 
