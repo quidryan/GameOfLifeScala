@@ -2,18 +2,37 @@ package gameoflife
 
 import scala.collection.mutable.HashMap
 
-class Board(width:Int, height:Int) {
-   val grid = new HashMap[Pair[Int, Int], Cell]
+case class Location(val x:Int, val y:Int) extends Tuple2[Int, Int](x,y)
 
-  //def getNeighbors(x:Int, y:Int):List[Cell]
+object Game {
+  //val previousGeneration:Board
+  def evolve(oldBoard:Board):Board = {
+     oldBoard
+  }
+}
+
+class Board(width:Int, height:Int) {
+   val grid = new HashMap[Location, Cell]
+
+  def getNeighbors(location:Location):Int = {
+    val xValues = Math.max(0, location.x-1) to Math.min(width, location.x+1)
+    val yValues = Math.max(0, location.y-1) to Math.min(height, location.y+1)
+    val cells = for {
+           xPos <- xValues
+           yPos <- yValues
+           if(Location(xPos, yPos) != location)
+         }
+         yield grid(Location(xPos, yPos))
+    cells.count(_ == AliveCell)
+  }
 }
 
 sealed abstract class Cell {
-  def nextGeneration(neighbors:Int):Cell
+  def nextGeneration(liveNeighborCount:Int):Cell
 }
 
 case object AliveCell extends Cell {
-  override def nextGeneration(neighbors:Int) = neigbors match {
+  override def nextGeneration(liveNeighborCount:Int) = liveNeighborCount match {
      case 2 => AliveCell
      case 3 => AliveCell
      case _ => DeadCell
@@ -21,7 +40,7 @@ case object AliveCell extends Cell {
 }
 
 case object DeadCell extends Cell {
-  override def nextGeneration(neighbors:Int) = neigbors match {
+  override def nextGeneration(liveNeighborCount:Int) = liveNeighborCount match {
      case 3 => AliveCell
      case _ => DeadCell
   }
