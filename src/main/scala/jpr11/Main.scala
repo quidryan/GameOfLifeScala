@@ -1,4 +1,4 @@
-package gameoflife
+package jpr11
 
 import scala.collection.mutable.HashMap
 
