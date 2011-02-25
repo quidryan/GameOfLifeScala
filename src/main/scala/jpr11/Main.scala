@@ -13,17 +13,13 @@ object Game {
   }
 
   def generateRandomBoard(width:Int, height:Int):Board = {
-    val positions = for {
+    val randomGrid = for {
       x <- 0 to width
       y <- 0 to height
-    } 
-    yield Location(x,y)
-    val randomGrid = Map(positions map {
-        val cell:Cell = if(util.Random.nextBoolean) AliveCell else DeadCell
-        (_, cell)
-      }: _ *)
-
-    return new Board(randomGrid)
+      val cell:Cell = if(util.Random.nextBoolean) AliveCell else DeadCell
+    }
+    yield (Location(x,y), cell)
+    return new Board(Map.empty ++ randomGrid)
   }
 }
 
