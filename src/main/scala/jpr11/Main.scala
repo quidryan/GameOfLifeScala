@@ -5,7 +5,7 @@ object Game {
   def evolve(oldBoard: Board): Board = {
     val newGrid = oldBoard.grid.map(entry => {
       val (location, cell) = entry
-      (location, cell.nextGeneration(oldBoard.getLiveNeighbors(location)))
+      (location, cell.createNextGeneration(oldBoard.getLiveNeighbors(location)))
     })
     return new Board(newGrid) // <-- Implicit conversion from Iterable[Tuple2] to Map[Location,Cell]
   }
