@@ -10,18 +10,14 @@ object Game {
     return new Board(newGrid) // <-- Implicit conversion from Iterable[Tuple2] to Map[Location,Cell]
   }
 
-  def generateRandomBoard(width: Int, height: Int): Board = {
-    val positions = for {
+  def generateRandomBoard(width:Int, height:Int):Board = {
+    val randomGrid = for {
       x <- 0 to width
       y <- 0 to height
+      val cell:Cell = if(util.Random.nextBoolean) AliveCell else DeadCell
     }
-    yield Location(x, y)
-    val randomGrid = Map(positions map {
-      val cell: Cell = if (util.Random.nextBoolean) AliveCell else DeadCell
-      (_, cell)
-    }: _ *)
-
-    return new Board(randomGrid)
+    yield (Location(x,y), cell)
+    return new Board(Map.empty ++ randomGrid)
   }
 }
 
