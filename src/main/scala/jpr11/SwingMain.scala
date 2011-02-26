@@ -6,22 +6,19 @@ import java.util.concurrent.{TimeUnit, Executors}
 
 object SwingMain extends SimpleSwingApplication {
 
-  val initial = Game.generateRandomBoard(40, 40)
+  implicit def funToRunnable(fun: () => Unit) = new Runnable() { def run() = fun() }
+
+  val initial = Game.generateRandomBoard(65, 65)
   def top = new MainFrame {
     val gameGrid = new GameGrid
     gameGrid.board = initial
 
     title = "Comway's Game of Life"
     contents = gameGrid
-    size = new Dimension(400,400)
-    Executors.newSingleThreadScheduledExecutor.scheduleAtFixedRate(new Runnable {
-      def run() = {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-          def run() = {
-            gameGrid.board = Game.evolve(gameGrid.board)
-          }
-        })
-      }
+    size = new Dimension(gameGrid.board.width*gameGrid.scale+gameGrid.scale, gameGrid.board.height*gameGrid.scale+gameGrid.scale)
+
+    Executors.newSingleThreadScheduledExecutor.scheduleAtFixedRate(() => {
+       gameGrid.board = Game.evolve(gameGrid.board)
     }, 250, 250, TimeUnit.MILLISECONDS)
   }
 
@@ -36,6 +33,7 @@ class GameGrid extends Component {
   def board = _board
   def board_=(b:Board) = {
     _board = b;
+    size = new Dimension(board.width*scale+scale, board.height*scale+scale)
     repaint
   }
 
