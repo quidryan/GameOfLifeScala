@@ -8,10 +8,19 @@ case class Location(x: Int, y: Int)
 
 class Board(val width : Int, val height : Int, cellGenerationFunction:Location => Cell) {
 
-  val grid: Map[Location, Cell] = createGrid()
+  private val grid: Map[Location, Cell] = createGrid()
 
   def getCell(location:Location) = {
     grid(location);
+  }
+
+  def visitCells(condition:(Cell=>Boolean))(fn:(Location=>Unit)) {
+    for (
+      (location, cell) <- grid
+      if (condition(cell))
+    ) {
+      fn(location)
+    }
   }
 
   /**

@@ -42,10 +42,7 @@ class GameGrid extends Component {
       g.setColor(Color.WHITE)
       g.fillRect(0, 0, _board.width*scale+scale, _board.height*scale+scale)
       g.setColor(Color.BLACK)
-      for (
-        (location, cell) <- _board.grid
-        if cell == AliveCell
-      ) {
+      board.visitCells(_ == AliveCell) { location =>
         g.fillRect(location.x*scale, location.y*scale, scale, scale);
       }
     }
