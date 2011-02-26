@@ -50,11 +50,11 @@ class Board(val width : Int, val height : Int, cellGenerationFunction:Location =
 
   /**
    * Evolve the board to its next generation
+   * TODO parallelize this
    * @return the next generation of the board
    */
   def evolve(): Board = {
     return new Board(width, height, (location:Location) => {
-      // TODO how to parallelize?
       val cell = this(location);
       cell.createNextGeneration(getLiveNeighborsCount(location))
     })
@@ -76,12 +76,11 @@ class Board(val width : Int, val height : Int, cellGenerationFunction:Location =
 
   override def toString(): String = {
     val buf = new StringBuilder()
-    for (y <- 0 to height) {
-      for (x <- 0 to width) {
-        val cell = grid(Location(x, y))
-        buf.append(cell)
-      }
-      buf.append("\n")
+    visitCells(_ => true) { location =>
+       val cell = this(location)
+       buf.append(cell)
+       if (location.x == width)
+         buf.append("\n")
     }
     buf.toString
   }
