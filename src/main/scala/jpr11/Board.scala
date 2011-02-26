@@ -6,7 +6,7 @@ package jpr11
 
 case class Location(x: Int, y: Int)
 
-class Board(val width: Int, val height: Int, cellGenerationFunction: Location => Cell) {
+class Board(val width : Int, val height : Int, cellGenerationFunction:Location => Cell) {
 
   private val grid: Map[Location, Cell] = createGrid()
 
@@ -15,14 +15,15 @@ class Board(val width: Int, val height: Int, cellGenerationFunction: Location =>
    * @param location the location to fetch a cell for
    * @return the cell at that location
    */
-  def apply(location: Location) = {
+  def apply(location:Location) = {
     grid(location);
   }
 
   /**
-   * Apply a function to all cells that match the condition
+   * Apply a function to all cells that match the condition. No promise that this
+   * will visit in order
    */
-  def visitCells(condition: (Cell => Boolean))(fn: (Location => Unit)) {
+  def visitCells(condition:(Cell=>Boolean))(fn:(Location=>Unit)) {
     for (
       (location, cell) <- grid
       if (condition(cell))
@@ -37,8 +38,8 @@ class Board(val width: Int, val height: Int, cellGenerationFunction: Location =>
    * @return the count of neighbors that are alive (int 0-8)
    */
   def getLiveNeighborsCount(location: Location): Int = {
-    val xValues = (0 max (location.x - 1)) to (width min (location.x + 1))
-    val yValues = (0 max (location.y - 1)) to (height min (location.y + 1))
+    val xValues = (0 max (location.x - 1)) to ((width - 1) min (location.x + 1))
+    val yValues = (0 max (location.y - 1)) to ((height - 1) min (location.y + 1))
     val cells = for {
       xPos <- xValues
       yPos <- yValues
@@ -54,8 +55,8 @@ class Board(val width: Int, val height: Int, cellGenerationFunction: Location =>
    * @return the next generation of the board
    */
   def evolve(): Board = {
-    return new Board(width, height, (location: Location) => {
-      val cell = this(location);
+    return new Board(width, height, (location:Location) => {
+      val cell = apply(location);
       cell.createNextGeneration(getLiveNeighborsCount(location))
     })
   }
@@ -65,23 +66,23 @@ class Board(val width: Int, val height: Int, cellGenerationFunction: Location =>
    */
   private def createGrid() = {
     val grid = for {
-      x <- 0 to width
-      y <- 0 to height
-      val location = Location(x, y)
-      val cell: Cell = cellGenerationFunction(location)
-    }
-    yield (location, cell)
-    Map.empty ++ grid
+          x <- 0 to width - 1
+          y <- 0 to height - 1
+          val location = Location(x, y)
+          val cell: Cell = cellGenerationFunction(location)
+        }
+        yield (location, cell)
+        Map.empty ++ grid
   }
 
   override def toString(): String = {
     val buf = new StringBuilder()
-    visitCells(_ => true) {
-      location =>
-        val cell = this(location)
+    for (y <- 0 to height - 1) {
+      for(x <- 0 to width - 1) {
+        val cell = grid(Location(x,y))
         buf.append(cell)
-        if (location.x == width)
-          buf.append("\n")
+      }
+      buf.append("\n")
     }
     buf.toString
   }

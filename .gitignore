@@ -5,3 +5,4 @@ project/boot/
 *.swp
 nbproject/
 *.iml
+.idea/
