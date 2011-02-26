@@ -3,21 +3,15 @@ package jpr11
 object Game {
   //val previousGeneration:Board
   def evolve(oldBoard: Board): Board = {
-    val newGrid = oldBoard.grid.map(entry => {
-      val (location, cell) = entry
-      (location, cell.createNextGeneration(oldBoard.getLiveNeighbors(location)))
+    return new Board(oldBoard.width, oldBoard.height, (location:Location) => {
+      // TODO how to parallelize?
+      val cell = oldBoard.getCell(location);
+      cell.createNextGeneration(oldBoard.getLiveNeighborsCount(location))
     })
-    return new Board(newGrid) // <-- Implicit conversion from Iterable[Tuple2] to Map[Location,Cell]
   }
 
   def generateRandomBoard(width: Int, height: Int): Board = {
-    val randomGrid = for {
-      x <- 0 to width
-      y <- 0 to height
-      val cell: Cell = if (util.Random.nextBoolean) AliveCell else DeadCell
-    }
-    yield (Location(x, y), cell)
-    return new Board(Map.empty ++ randomGrid)
+    return new Board(width, height, (location:Location) => if (util.Random.nextBoolean) AliveCell else DeadCell)
   }
 }
 
