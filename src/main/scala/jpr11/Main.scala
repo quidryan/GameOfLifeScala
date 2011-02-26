@@ -1,27 +1,25 @@
 package jpr11
 
-import scala.util.Random
-
 object Game {
   //val previousGeneration:Board
-  def evolve(oldBoard:Board):Board = {
+  def evolve(oldBoard: Board): Board = {
     val newGrid = oldBoard.grid.map(entry => {
-        val (location,cell) = entry
-        (location, cell.nextGeneration(oldBoard.getLiveNeighbors(location)))
-      })
+      val (location, cell) = entry
+      (location, cell.nextGeneration(oldBoard.getLiveNeighbors(location)))
+    })
     return new Board(newGrid) // <-- Implicit conversion from Iterable[Tuple2] to Map[Location,Cell]
   }
 
-  def generateRandomBoard(width:Int, height:Int):Board = {
+  def generateRandomBoard(width: Int, height: Int): Board = {
     val positions = for {
       x <- 0 to width
       y <- 0 to height
-    } 
-    yield Location(x,y)
+    }
+    yield Location(x, y)
     val randomGrid = Map(positions map {
-        val cell:Cell = if(util.Random.nextBoolean) AliveCell else DeadCell
-        (_, cell)
-      }: _ *)
+      val cell: Cell = if (util.Random.nextBoolean) AliveCell else DeadCell
+      (_, cell)
+    }: _ *)
 
     return new Board(randomGrid)
   }
