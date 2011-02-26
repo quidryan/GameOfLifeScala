@@ -4,7 +4,7 @@
 
 package jpr11
 
-case class Location(x: Int, y: Int) extends Tuple2[Int, Int](x, y)
+case class Location(x: Int, y: Int)
 
 class Board(val grid: Map[Location, Cell]) {
 

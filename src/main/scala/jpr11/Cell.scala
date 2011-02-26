@@ -24,5 +24,5 @@ case object DeadCell extends Cell {
     case _ => DeadCell
   }
 
-  override def toString = "O"
+  override def toString = "."
 }
