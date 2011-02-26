@@ -26,11 +26,16 @@ class AliveCellSpec extends FlatSpec with ShouldMatchers {
   }
 
   "A live cell with minimum possible live neighbors" should "die" in {
-    AliveCell.nextGeneration(Integer.MIN_VALUE) should be(DeadCell)
+    AliveCell.nextGeneration(0) should be(DeadCell)
   }
 
   "A live cell with maximum possible live neighbors" should "die" in {
-    AliveCell.nextGeneration(Integer.MAX_VALUE) should be(DeadCell)
+    AliveCell.nextGeneration(8) should be(DeadCell)
+  }
+
+  "A live cell with an illegal number of live neighbors" should "throw an exception" in {
+    evaluating { AliveCell.nextGeneration(9) } should produce [IllegalArgumentException]
+    evaluating { AliveCell.nextGeneration(-1) } should produce [IllegalArgumentException]
   }
 }
 
