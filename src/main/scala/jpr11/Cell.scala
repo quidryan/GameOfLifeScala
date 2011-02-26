@@ -21,6 +21,8 @@ case object AliveCell extends Cell {
     case 3 => AliveCell
     case _ => DeadCell
   }
+
+  override def toString = "X"
 }
 
 case object DeadCell extends Cell {
@@ -28,4 +30,6 @@ case object DeadCell extends Cell {
     case 3 => AliveCell
     case _ => DeadCell
   }
+
+  override def toString = "."
 }
