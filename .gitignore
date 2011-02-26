@@ -4,3 +4,6 @@ src_managed/
 project/boot/
 *.swp
 nbproject/
+
+*
+*.iml
