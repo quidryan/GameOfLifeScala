@@ -10,10 +10,18 @@ class Board(val width : Int, val height : Int, cellGenerationFunction:Location =
 
   private val grid: Map[Location, Cell] = createGrid()
 
-  def getCell(location:Location) = {
+  /**
+   * Apply on the board itself delegates to the board's map
+   * @param location the location to fetch a cell for
+   * @return the cell at that location
+   */
+  def apply(location:Location) = {
     grid(location);
   }
 
+  /**
+   * Apply a function to all cells that match the condition
+   */
   def visitCells(condition:(Cell=>Boolean))(fn:(Location=>Unit)) {
     for (
       (location, cell) <- grid
@@ -38,6 +46,18 @@ class Board(val width : Int, val height : Int, cellGenerationFunction:Location =
     }
     yield grid(Location(xPos, yPos))
     cells.count(_ == AliveCell)
+  }
+
+  /**
+   * Evolve the board to its next generation
+   * @return the next generation of the board
+   */
+  def evolve(): Board = {
+    return new Board(width, height, (location:Location) => {
+      // TODO how to parallelize?
+      val cell = this(location);
+      cell.createNextGeneration(getLiveNeighborsCount(location))
+    })
   }
 
   /**

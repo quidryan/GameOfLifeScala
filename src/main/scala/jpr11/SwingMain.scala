@@ -6,9 +6,14 @@ import java.util.concurrent.{TimeUnit, Executors}
 
 object SwingMain extends SimpleSwingApplication {
 
+  private final val BOARD_WIDTH = 65;
+  private final val BOARD_HEIGHT = 65;
+
   implicit def funToRunnable(fun: () => Unit) = new Runnable() { def run() = fun() }
 
-  val initial = Game.generateRandomBoard(65, 65)
+  // generate random board
+  val initial = new Board(BOARD_WIDTH, BOARD_HEIGHT, (location:Location) => if (util.Random.nextBoolean) AliveCell else DeadCell)
+  
   def top = new MainFrame {
     val gameGrid = new GameGrid
     gameGrid.board = initial
@@ -18,10 +23,9 @@ object SwingMain extends SimpleSwingApplication {
     size = new Dimension(gameGrid.board.width*gameGrid.scale+gameGrid.scale, gameGrid.board.height*gameGrid.scale+gameGrid.scale)
 
     Executors.newSingleThreadScheduledExecutor.scheduleAtFixedRate(() => {
-       gameGrid.board = Game.evolve(gameGrid.board)
+       gameGrid.board = gameGrid.board.evolve()
     }, 250, 250, TimeUnit.MILLISECONDS)
   }
-
 
 }
 
