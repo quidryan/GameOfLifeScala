@@ -10,20 +10,14 @@ class BoardSpec extends FlatSpec with ShouldMatchers {
   //XX..
   //X.X.
   //X...
-  val board = new Board(3, 3, (location:Location) => location.x match {
-    case 0 => AliveCell
-    case 1 => location.y match {
-      case 1 => AliveCell
-      case _ => DeadCell
-    }
-    case 2 => location.y match {
-      case 2 => AliveCell
-      case _ => DeadCell
-    }
-    case _ => DeadCell
-  })
+  val scenario = """
+  X..
+  XX.
+  X.X
+  """
+  val board = BoardFactory.loadBoard(scenario)
 
-  System.out.println("Board \n%s" format board.toString)
+  println("Board \n%s" format board)
 
   "The test board" should "have the correct width and height" in {
     board.width should be(3)
@@ -54,8 +48,19 @@ class BoardSpec extends FlatSpec with ShouldMatchers {
     board.getLiveNeighborsCount(Location(2,2)) should be(1)
   }
 
+  // 012
+  // X.. 0
+  // XX. 1
+  // X.X 2
+
+  // XX.
+  // X..
+  // X..
   it should "evolve into the next generation correctly" in {
     val nextBoard = board.evolve
+
+println("***********************")
+println("#######################")
 
     // Refer to the rules on this page: http://en.wikipedia.org/wiki/Conway's_Game_of_Life
     nextBoard(Location(0,0)) should be(AliveCell) // still alive (rule 2)
@@ -64,8 +69,11 @@ class BoardSpec extends FlatSpec with ShouldMatchers {
 
     nextBoard(Location(1,0)) should be(AliveCell) // became alive (rule 4)
     nextBoard(Location(1,1)) should be(DeadCell)  // dies (rule 3)
+    nextBoard(Location(1,2)) should be(DeadCell)  // not rule applied, stayed the same
 
-    nextBoard(Location(2,1)) should be(DeadCell)  // dies (rule 1)
+    nextBoard(Location(2,0)) should be(DeadCell)  // not rule applied, stayed the same
+    nextBoard(Location(2,1)) should be(DeadCell)  // not rule applied, stayed the same
+    nextBoard(Location(2,2)) should be(DeadCell)  // dies (rule 1, 1 neighbor
   }
 
 }
