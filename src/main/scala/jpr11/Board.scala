@@ -1,5 +1,5 @@
 /*
- * Represents a fixed-size board. Cells on the edge of the board have dead neigbors.
+ * Represents a fixed-size board. Cells on the edge of the board have dead neighbors.
  */
 
 package jpr11
@@ -8,7 +8,7 @@ case class Location(x: Int, y: Int)
 
 class Board(val width : Int, val height : Int, cellGenerationFunction:Location => Cell) {
 
-  private val grid: Map[Location, Cell] = createGrid()
+  private var grid: Map[Location, Cell] = createGrid()
 
   /**
    * Apply on the board itself delegates to the board's map
@@ -17,6 +17,10 @@ class Board(val width : Int, val height : Int, cellGenerationFunction:Location =
    */
   def apply(location:Location) = {
     grid(location);
+  }
+
+  def clear() = {
+    grid = null
   }
 
   /**
@@ -33,11 +37,14 @@ class Board(val width : Int, val height : Int, cellGenerationFunction:Location =
   }
 
   /**
-   * Get the count of live neigbors for a given location
+   * Get the count of live neighbors for a given location
    * @param a specific location
    * @return the count of neighbors that are alive (int 0-8)
    */
   def getLiveNeighborsCount(location: Location): Int = {
+    require( location.x >= 0 && location.x < width, "Location.x out of bounds" )
+    require( location.y >= 0 && location.y < height, "Location.y out of bounds" )
+
     val xValues = (0 max (location.x - 1)) to ((width - 1) min (location.x + 1))
     val yValues = (0 max (location.y - 1)) to ((height - 1) min (location.y + 1))
     val cells = for {
@@ -65,14 +72,15 @@ class Board(val width : Int, val height : Int, cellGenerationFunction:Location =
    * Create the grid internally based on the cell generation function
    */
   private def createGrid() = {
-    val grid = for {
+    val grid = collection.mutable.Map[Location, Cell]()
+    for {
           x <- 0 to width - 1
           y <- 0 to height - 1
           val location = Location(x, y)
           val cell: Cell = cellGenerationFunction(location)
         }
-        yield (location, cell)
-        Map.empty ++ grid
+        grid += (location -> cell)
+    grid.toMap
   }
 
   override def toString(): String = {

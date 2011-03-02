@@ -10,11 +10,11 @@ class BoardSpec extends FlatSpec with ShouldMatchers {
   //XX..
   //X.X.
   //X...
-  val scenario = """
-  X..
-  XX.
-  X.X
-  """
+  val scenario = """|X..
+                    |XX.
+                    |X.X
+                    |""".stripMargin
+
   val board = BoardFactory.loadBoard(scenario)
 
   println("Board \n%s" format board)
@@ -43,9 +43,25 @@ class BoardSpec extends FlatSpec with ShouldMatchers {
 
   // not really a behavior, but needed to test
   it should "generate the correct live neighbor counts" in {
+    board.getLiveNeighborsCount(Location(0,0)) should be(2)
+    board.getLiveNeighborsCount(Location(0,1)) should be(3)
+    board.getLiveNeighborsCount(Location(0,2)) should be(2)
     board.getLiveNeighborsCount(Location(1,0)) should be(3)
     board.getLiveNeighborsCount(Location(1,1)) should be(4)
+    board.getLiveNeighborsCount(Location(1,2)) should be(4)
+    board.getLiveNeighborsCount(Location(2,0)) should be(1)
+    board.getLiveNeighborsCount(Location(2,1)) should be(2)
     board.getLiveNeighborsCount(Location(2,2)) should be(1)
+  }
+
+  "accessing cells outside of the bounds of the board" should "throw an exception" in {
+    evaluating { board.getLiveNeighborsCount(Location(-1, 0)) } should produce [IllegalArgumentException]
+    evaluating { board.getLiveNeighborsCount(Location(0, -1)) } should produce [IllegalArgumentException]
+    evaluating { board.getLiveNeighborsCount(Location(-1, -1)) } should produce [IllegalArgumentException]
+
+    evaluating { board.getLiveNeighborsCount(Location(0, 3)) } should produce [IllegalArgumentException]
+    evaluating { board.getLiveNeighborsCount(Location(3, 0)) } should produce [IllegalArgumentException]
+    evaluating { board.getLiveNeighborsCount(Location(3, 3)) } should produce [IllegalArgumentException]
   }
 
   // 012
@@ -76,6 +92,9 @@ println("#######################")
     nextBoard(Location(2,2)) should be(DeadCell)  // dies (rule 1, 1 neighbor
   }
 
+  "toString" should "match the input string" in {
+    board.toString should be(scenario)
+  }
 }
 
 

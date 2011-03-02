@@ -10,6 +10,7 @@ object BoardFactory {
     } yield row.toList
 
   }
+
   def loadBoard(gridString:String):Board = {
     val rows = splitIntoArray(gridString)
     return new Board(rows(0).size, rows.size, (location:Location) => {
@@ -20,9 +21,4 @@ object BoardFactory {
         }
     })
   }
-
-//  def generateRandomBoard(width:Int, height:Int):Board = {
-//    new Board(width, height, (location:Location) => if (util.Random.nextBoolean) AliveCell else DeadCell)
-//  }
-
 }
