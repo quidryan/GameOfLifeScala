@@ -6,9 +6,28 @@ package jpr11
 
 case class Location(x: Int, y: Int)
 
-class Board(val width : Int, val height : Int, cellGenerationFunction:Location => Cell) {
+object Board {
+  /**
+   * Create the grid internally based on the cell generation function
+   */
+  private def createGrid(width: Int, height: Int, cellGenerationFunction:Location => Cell) = {
+    val grid = collection.mutable.Map[Location, Cell]()
+    for {
+          x <- 0 to width - 1
+          y <- 0 to height - 1
+          val location = Location(x, y)
+          val cell: Cell = cellGenerationFunction(location)
+        }
+        grid += (location -> cell)
+    grid.toMap
+  }
+}
 
-  private var grid: Map[Location, Cell] = createGrid()
+class Board(val width : Int, val height : Int, val grid:Map[Location, Cell]) {
+
+  def this(width: Int, height: Int, cellGenerationFunction:Location => Cell) {
+    this(width, height, Board.createGrid(width, height, cellGenerationFunction))
+  }
 
   /**
    * Apply on the board itself delegates to the board's map
@@ -17,10 +36,6 @@ class Board(val width : Int, val height : Int, cellGenerationFunction:Location =
    */
   def apply(location:Location) = {
     grid(location);
-  }
-
-  def clear() = {
-    grid = null
   }
 
   /**
@@ -66,21 +81,6 @@ class Board(val width : Int, val height : Int, cellGenerationFunction:Location =
       val cell = apply(location);
       cell.createNextGeneration(getLiveNeighborsCount(location))
     })
-  }
-
-  /**
-   * Create the grid internally based on the cell generation function
-   */
-  private def createGrid() = {
-    val grid = collection.mutable.Map[Location, Cell]()
-    for {
-          x <- 0 to width - 1
-          y <- 0 to height - 1
-          val location = Location(x, y)
-          val cell: Cell = cellGenerationFunction(location)
-        }
-        grid += (location -> cell)
-    grid.toMap
   }
 
   override def toString(): String = {

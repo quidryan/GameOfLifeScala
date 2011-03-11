@@ -19,30 +19,7 @@ object SwingMain extends SimpleSwingApplication {
   def top = new MainFrame {
     title = "Comway's Game of Life"
 
-    object buttonState extends Enumeration("Start", "Stop") {
-      val start, stop = Value
-    }
-
-    class StartStopButton(var currentState: buttonState.Value) extends Button {
-      text = currentState.toString
-
-      private def setState(newState: buttonState.Value) = {
-        currentState = newState
-        text = currentState.toString
-      }
-
-      def toggle = {
-        if (currentState == buttonState.start) {
-          mainActor ! "start"
-          setState(buttonState.stop)
-        } else {
-          mainActor ! "stop"
-          setState(buttonState.start)
-        }
-      }
-    }
-
-    val startStopButton = new StartStopButton(buttonState.stop)
+    val startStopButton = new Button("Stop")
     val randomButton = new Button("Random")
 
     contents = new BorderPanel() {
@@ -58,35 +35,33 @@ object SwingMain extends SimpleSwingApplication {
       border = Swing.EmptyBorder(10, 10, 10, 10)
     }
 
-    actor {
-      loop {
-        Thread.sleep(250)
-        mainActor ! "refresh"
-      }
-    }
-
     var mainActor = actor {
       var updating = true
       loop {
-        react {
+        reactWithin(250) {
           case "start" =>
             updating = true;
           case "stop" =>
             updating = false;
-          case "refresh" =>
-            if (updating)
-              gameGrid.board = gameGrid.board.evolve()
           case "random" =>
             gameGrid.board = randomBoard
+          case _ =>
+            if (updating)
+              gameGrid.board = gameGrid.board.evolve()
+
         }
       }
     }
 
     listenTo(startStopButton)
     listenTo(randomButton)
+
     reactions += {
       case ButtonClicked(`startStopButton`) => {
-        startStopButton.toggle
+        startStopButton.text match {
+          case "Stop" => mainActor ! "stop"; startStopButton.text = "Start"
+          case _ => mainActor ! "start"; startStopButton.text = "Stop"
+        }
       }
       case ButtonClicked(`randomButton`) => {
         mainActor ! "random"
@@ -107,7 +82,6 @@ class GameGrid extends Component {
   def board = _board
 
   def board_=(b: Board) = {
-    if (_board != null) _board.clear() // seems like I shouldn't need this, but it leaks the board contents every time without it
     _board = b;
     preferredSize = new Dimension(_board.width * scale, _board.height * scale)
     repaint
