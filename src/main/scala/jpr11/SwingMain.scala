@@ -41,6 +41,7 @@ object SwingMain extends SimpleSwingApplication {
         reactWithin(250) {
           case "start" =>
             updating = true;
+            gameGrid.board = gameGrid.board.evolve()
           case "stop" =>
             updating = false;
           case "random" =>
