@@ -95,10 +95,10 @@ class Board(val width : Int, val height : Int, val grid:Map[Location, Cell]) {
       .groupBy((l) => l)
       // Convert the values in the map to their size
       .mapValues(_.size)
-      // convert the neighbor count to an AliveCell
-      .collect {
-        case (l, 3) => l -> AliveCell
-        case (l, 2) if grid(l) == AliveCell => l -> AliveCell
+      // evolve a cell at a location based on it's state and neighbor count
+      .map {
+        case (location, neighborCount) =>
+          location -> grid(location).createNextGeneration(neighborCount)
       }
 
     return new Board(width, height, survivors.getOrElse(_, DeadCell))
