@@ -57,18 +57,22 @@ class Board(val width : Int, val height : Int, val grid:Map[Location, Cell]) {
    * @return the count of neighbors that are alive (int 0-8)
    */
   def getLiveNeighborsCount(location: Location): Int = {
-    require( location.x >= 0 && location.x < width, "Location.x out of bounds" )
-    require( location.y >= 0 && location.y < height, "Location.y out of bounds" )
+    getNeighbors(location).count(grid(_) == AliveCell)
+  }
 
-    val xValues = (0 max (location.x - 1)) to ((width - 1) min (location.x + 1))
-    val yValues = (0 max (location.y - 1)) to ((height - 1) min (location.y + 1))
-    val cells = for {
+  def getNeighbors(srcLocation: Location):Seq[Location] = {
+    require( srcLocation.x >= 0 && srcLocation.x < width, "Location.x out of bounds" )
+    require( srcLocation.y >= 0 && srcLocation.y < height, "Location.y out of bounds" )
+
+    val xValues = (0 max (srcLocation.x - 1)) to ((width - 1) min (srcLocation.x + 1))
+    val yValues = (0 max (srcLocation.y - 1)) to ((height - 1) min (srcLocation.y + 1))
+    for {
       xPos <- xValues
       yPos <- yValues
-      if (Location(xPos, yPos) != location)
+      val location = Location(xPos, yPos)
+      if (location != srcLocation)
     }
-    yield grid(Location(xPos, yPos))
-    cells.count(_ == AliveCell)
+    yield location
   }
 
   /**
@@ -77,10 +81,27 @@ class Board(val width : Int, val height : Int, val grid:Map[Location, Cell]) {
    * @return the next generation of the board
    */
   def evolve(): Board = {
-    return new Board(width, height, (location:Location) => {
-      val cell = apply(location);
-      cell.createNextGeneration(getLiveNeighborsCount(location))
-    })
+    // Type optional, but added to clearify code.
+    val survivors:Map[Location, Cell] = grid
+      // flattent the map to a list of all neighbors to live cells,
+      // including duplicates.
+      .flatMap {
+        case (l, AliveCell) => getNeighbors(l)
+        case _ => Nil
+      }
+      // Group together the locations. Each occurence of a location in
+      // the collection represents it borders to a live cell. So the count of
+      // matching locations is the count of neighbors
+      .groupBy((l) => l)
+      // Convert the values in the map to their size
+      .mapValues(_.size)
+      // convert the neighbor count to an AliveCell
+      .collect {
+        case (l, 3) => l -> AliveCell
+        case (l, 2) if grid(l) == AliveCell => l -> AliveCell
+      }
+
+    return new Board(width, height, survivors.getOrElse(_, DeadCell))
   }
 
   override def toString(): String = {
