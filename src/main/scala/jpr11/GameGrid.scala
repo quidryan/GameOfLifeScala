@@ -38,8 +38,8 @@ class GameGrid extends Component with Actor {
     val width = maxX - minX
     val height = maxY - minY
 
-    val xScale = (bounds.width-bounds.x) / width.asInstanceOf[Double]
-    val yScale = (bounds.height-bounds.y) / height.asInstanceOf[Double]
+    val xScale = (bounds.width-bounds.x) / (width max height).asInstanceOf[Double]
+    val yScale = (bounds.height-bounds.y) / (width max height).asInstanceOf[Double]
     g.setColor(Color.WHITE)
     g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height)
     g.setColor(Color.BLACK)
