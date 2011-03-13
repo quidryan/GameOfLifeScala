@@ -30,6 +30,7 @@ class EndlessBoard(val aliveCells:Set[Location]) {
       .flatMap(getNeighbors)
       .groupBy((l) => l)
       .mapValues(_.size)
+      // Collect only live cells
       .collect {
         case (location, 3) => location
         case (location, 2) if aliveCells(location) => location
