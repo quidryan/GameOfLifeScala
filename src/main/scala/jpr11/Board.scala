@@ -17,13 +17,27 @@ object Board {
           y <- 0 to height - 1
           val location = Location(x, y)
           val cell: Cell = cellGenerationFunction(location)
+          if cell == AliveCell
         }
         grid += (location -> cell)
     grid.toMap
   }
+
+  def randomBoard(width: Int, height: Int) = {
+    new Board(width, height, (location) => if (util.Random.nextBoolean) AliveCell else DeadCell)
+  }
 }
 
 class Board(val width : Int, val height : Int, val grid:Map[Location, Cell]) {
+
+  val minX = 0
+  val maxX = width
+  val minY = 0
+  val maxY = height
+
+  val aliveCells = grid.collect {
+    case (location, AliveCell) => location
+  }
 
   def this(width: Int, height: Int, cellGenerationFunction:Location => Cell) {
     this(width, height, Board.createGrid(width, height, cellGenerationFunction))
@@ -35,7 +49,7 @@ class Board(val width : Int, val height : Int, val grid:Map[Location, Cell]) {
    * @return the cell at that location
    */
   def apply(location:Location) = {
-    grid(location);
+    grid.getOrElse(location, DeadCell);
   }
 
   /**
@@ -98,7 +112,7 @@ class Board(val width : Int, val height : Int, val grid:Map[Location, Cell]) {
       // evolve a cell at a location based on it's state and neighbor count
       .map {
         case (location, neighborCount) =>
-          location -> grid(location).createNextGeneration(neighborCount)
+          location -> this(location).createNextGeneration(neighborCount)
       }
 
     return new Board(width, height, survivors.getOrElse(_, DeadCell))

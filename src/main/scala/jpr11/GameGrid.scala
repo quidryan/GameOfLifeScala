@@ -17,30 +17,43 @@ class GameGrid extends Component with Actor {
   val width = 120
   val height = 120
 
-  private var _board = randomBoard;
+  def randomBoard = EndlessBoard.randomBoard _
+
+  private var _board = randomBoard(width, height);
   private var speed = 250
   private var updating = true
+  private var stopped = false
+
+  var minX = 0
+  var maxX = 0
+  var minY = 0
+  var maxY = 0
 
   override def paintComponent(g: Graphics2D) {
     val bounds = g.getClipBounds
-    val xScale = (bounds.width-bounds.x) / _board.width.asInstanceOf[Double]
-    val yScale = (bounds.height-bounds.y) / _board.height.asInstanceOf[Double]
+    minX = minX min _board.minX
+    maxX = maxX max _board.maxX
+    minY = minY min _board.minY
+    maxY = maxY max _board.maxY
+    val width = maxX - minX
+    val height = maxY - minY
+
+    val xScale = (bounds.width-bounds.x) / width.asInstanceOf[Double]
+    val yScale = (bounds.height-bounds.y) / height.asInstanceOf[Double]
     g.setColor(Color.WHITE)
     g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height)
     g.setColor(Color.BLACK)
-    _board.grid.foreach {
-      case (location, AliveCell) =>
-        g.fill(new Rectangle2D.Double(location.x * xScale, location.y * yScale, xScale, yScale))
-      case _ =>
+    _board.aliveCells.foreach { location =>
+        g.fill(new Rectangle2D.Double((location.x-minX) * xScale, (location.y-minY) * yScale, xScale, yScale))
     }
   }
 
-  def act() = loop {
+  def act() = loopWhile(!stopped) {
     reactWithin(speed) {
       case SetUpdating(value) => updating = value
-      case Randomize => _board = randomBoard
+      case Randomize => _board = randomBoard(width, height)
       case AdjustSpeed(delta) => speed = 50 max (speed-delta)
-      case Exit => exit
+      case Exit => stopped = true
       case _ if (updating) => {
         _board = _board.evolve
         repaint
@@ -48,9 +61,6 @@ class GameGrid extends Component with Actor {
     }
   }
 
-  def randomBoard: Board = {
-    new Board(width, height, (location) => if (util.Random.nextBoolean) AliveCell else DeadCell)
-  }
 }
 
 

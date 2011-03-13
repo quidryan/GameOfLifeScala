@@ -35,8 +35,6 @@ object SwingMain extends SimpleSwingApplication {
     listenTo(slowerButton)
     listenTo(gameGrid)
 
-    override def size = self.getSize
-
     reactions += {
       case WindowOpened(_) => gameGrid.start
       case WindowClosed(_) => gameGrid ! Exit
