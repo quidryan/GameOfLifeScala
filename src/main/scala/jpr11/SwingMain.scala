@@ -1,26 +1,18 @@
 package jpr11
 
-import java.awt.{Dimension, Color, Graphics2D}
-import scala.actors.Actor._
 import swing._
-import event.ButtonClicked
+import event._
 
 object SwingMain extends SimpleSwingApplication {
-
-  private val BOARD_WIDTH = 65;
-  private val BOARD_HEIGHT = 65;
-
-  val gameGrid = {
-    val grid = new GameGrid
-    grid.board = randomBoard
-    grid
-  }
 
   def top = new MainFrame {
     title = "Comway's Game of Life"
 
     val startStopButton = new Button("Stop")
+    val fasterButton = new Button("+")
+    val slowerButton = new Button("-")
     val randomButton = new Button("Random")
+    val gameGrid = new GameGrid
 
     contents = new BorderPanel() {
 
@@ -28,6 +20,8 @@ object SwingMain extends SimpleSwingApplication {
 
       add(new FlowPanel {
         contents += startStopButton
+        contents += fasterButton
+        contents += slowerButton
         contents += randomButton
       }, Position.North)
       add(gameGrid, Position.Center)
@@ -35,68 +29,38 @@ object SwingMain extends SimpleSwingApplication {
       border = Swing.EmptyBorder(10, 10, 10, 10)
     }
 
-    var mainActor = actor {
-      var updating = true
-      loop {
-        reactWithin(250) {
-          case "start" =>
-            updating = true;
             gameGrid.board = gameGrid.board.evolve()
-          case "stop" =>
-            updating = false;
-          case "random" =>
-            gameGrid.board = randomBoard
-          case _ =>
-            if (updating)
-              gameGrid.board = gameGrid.board.evolve()
-
-        }
-      }
-    }
-
     listenTo(startStopButton)
     listenTo(randomButton)
+    listenTo(fasterButton)
+    listenTo(slowerButton)
+    listenTo(gameGrid)
 
     reactions += {
+      case WindowOpened(_) => gameGrid.start
+      case WindowClosed(_) => gameGrid ! Exit
+      case ButtonClicked(`randomButton`) => gameGrid ! Randomize
+      case ButtonClicked(`fasterButton`) => gameGrid ! AdjustSpeed(50)
+      case ButtonClicked(`slowerButton`) => gameGrid ! AdjustSpeed(-50)
+
       case ButtonClicked(`startStopButton`) => {
         startStopButton.text match {
-          case "Stop" => mainActor ! "stop"; startStopButton.text = "Start"
-          case _ => mainActor ! "start"; startStopButton.text = "Stop"
+          case "Stop" => gameGrid ! SetUpdating(false); startStopButton.text = "Start"
+          case _ => gameGrid ! SetUpdating(true); startStopButton.text = "Stop"
         }
       }
-      case ButtonClicked(`randomButton`) => {
-        mainActor ! "random"
+      case ComponentResized(`gameGrid`) => {
+        val gWidth = gameGrid.size.width;
+        val gHeight = gameGrid.size.height;
+        // Adjust size if the gameGrid is not square
+        if (gWidth < gHeight) {
+          self.setSize(size.width, size.height-gHeight+gWidth)
+        } else if (gameGrid.size.width > gameGrid.size.height) {
+          self.setSize(size.width-gWidth+gHeight, size.height)
+        }
       }
     }
   }
 
-  def randomBoard: Board = {
-    new Board(BOARD_WIDTH, BOARD_HEIGHT, (location: Location) => if (util.Random.nextBoolean) AliveCell else DeadCell)
-  }
 }
 
-class GameGrid extends Component {
-
-  private var _board: Board = null;
-  val scale = 8
-
-  def board = _board
-
-  def board_=(b: Board) = {
-    _board = b;
-    preferredSize = new Dimension(_board.width * scale, _board.height * scale)
-    repaint
-  }
-
-  override def paintComponent(g: Graphics2D) {
-    if (_board != null) {
-      g.setColor(Color.WHITE)
-      g.fillRect(0, 0, _board.width * scale, _board.height * scale)
-      g.setColor(Color.BLACK)
-      _board.visitCells(_ == AliveCell) {
-        location =>
-          g.fillRect(location.x * scale, location.y * scale, scale, scale);
-      }
-    }
-  }
-}
