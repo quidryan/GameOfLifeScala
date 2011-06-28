@@ -6,3 +6,4 @@ project/boot/
 nbproject/
 *.iml
 .idea/
+project/plugins/project/build.properties
